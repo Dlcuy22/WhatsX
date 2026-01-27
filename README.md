@@ -1,6 +1,6 @@
 # WhatsX - Multi-Instance WhatsApp Wrapper
 
-[Indonesian][https://github.com/Dlcuy22/WhatsX/blob/main/README.id.md]
+[Indonesian](https://github.com/Dlcuy22/WhatsX/blob/main/README.id.md)
 WhatsX is a lightweight wrapper for [web.whatsapp.com](https://web.whatsapp.com) built using Wails. Its core feature is **multi-instance** support, allowing you to run multiple WhatsApp accounts simultaneously with isolated profiles.
 
 ## Features

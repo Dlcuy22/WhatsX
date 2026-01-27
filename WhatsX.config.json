@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "default": {
+      "name": "Personal",
+      "data_path": "data/personal"
+    },
+    "business": {
+      "name": "Business Account",
+      "data_path": "data/business"
+    },
+    "gaming": {
+      "name": "Gaming Community",
+      "data_path": "data/gaming"
+    }
+  }
+}

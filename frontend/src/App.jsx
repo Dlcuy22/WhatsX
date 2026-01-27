@@ -1,12 +1,23 @@
-import {useState} from 'react';
-import logo from './assets/images/logo-universal.png';
+import {useEffect} from 'react';
 import './App.css';
-import {Greet} from "../wailsjs/go/main/App";
 
 function App() {
+    useEffect(() => {
+        // Delay redirect slightly to show the loading screen
+        const timer = setTimeout(() => {
+            window.location.href = "https://web.whatsapp.com";
+        }, 800);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <div id="App">
- <h1>hi there</h1>
+        <div id="App" className="loading-container">
+            <div className="loader-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <h2 className="loading-text">Loading WhatsApp</h2>
         </div>
     )
 }

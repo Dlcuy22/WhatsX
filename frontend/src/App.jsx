@@ -1,9 +1,11 @@
-import {useEffect} from 'react';
+/*
+App Component - Loading screen before redirecting to WhatsApp Web
+*/
+import { useEffect } from 'react';
 import './App.css';
 
 function App() {
     useEffect(() => {
-        // Delay redirect slightly to show the loading screen
         const timer = setTimeout(() => {
             window.location.href = "https://web.whatsapp.com";
         }, 800);
@@ -19,7 +21,7 @@ function App() {
             </div>
             <h2 className="loading-text">Loading WhatsApp</h2>
         </div>
-    )
+    );
 }
 
-export default App
+export default App;

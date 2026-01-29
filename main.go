@@ -1,7 +1,7 @@
 package main
 
 import (
-	"WhatsX/internal/utils"
+	"WhatsX/config"
 	"context"
 	"embed"
 	"flag"
@@ -9,14 +9,64 @@ import (
 	"path/filepath"
 
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/menu"
+	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	_ "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+// appContext stores the application context for menu callbacks
+var appContext context.Context
+
+func createAppMenu() *menu.Menu {
+	appMenu := menu.NewMenu()
+
+	// File Menu
+	fileMenu := appMenu.AddSubmenu("File")
+	fileMenu.AddText("Reload", keys.CmdOrCtrl("r"), func(_ *menu.CallbackData) {
+		if appContext != nil {
+			runtime.WindowReload(appContext)
+		}
+	})
+	fileMenu.AddSeparator()
+	fileMenu.AddText("Quit", keys.CmdOrCtrl("q"), func(_ *menu.CallbackData) {
+		if appContext != nil {
+			runtime.Quit(appContext)
+		}
+	})
+
+	// View Menu
+	viewMenu := appMenu.AddSubmenu("View")
+	viewMenu.AddText("Toggle Fullscreen", keys.Key("F11"), func(_ *menu.CallbackData) {
+		if appContext != nil {
+			runtime.WindowToggleMaximise(appContext)
+		}
+	})
+	viewMenu.AddText("Minimize", keys.CmdOrCtrl("m"), func(_ *menu.CallbackData) {
+		if appContext != nil {
+			runtime.WindowMinimise(appContext)
+		}
+	})
+
+	// Help Menu
+	helpMenu := appMenu.AddSubmenu("Help")
+	helpMenu.AddText("About WhatsX", nil, func(_ *menu.CallbackData) {
+		if appContext != nil {
+			runtime.MessageDialog(appContext, runtime.MessageDialogOptions{
+				Type:    runtime.InfoDialog,
+				Title:   "About WhatsX",
+				Message: "WhatsX - WhatsApp Desktop Wrapper\nVersion 1.0.0",
+			})
+		}
+	})
+
+	return appMenu
+}
 
 func main() {
 	// Parse CLI flags
@@ -36,29 +86,33 @@ func main() {
 
 	// Load Configuration
 	configPath := filepath.Join(exeDir, "WhatsX.config.json")
-	config, _ := utils.LoadConfig(configPath)
+	config.CreateConfigIfMissing(configPath)
+	cfg, _ := config.LoadConfig(configPath)
 
 	// Resolve Profile
 	profileName := *profileFlag
-	profileInfo := utils.ResolveProfile(config, profileName, exeDir)
+	profileInfo := config.ResolveProfile(cfg, profileName, exeDir)
 
 	// Create data directory if it doesn't exist
-	_ = utils.EnsureDataDirectory(profileInfo.DataPath)
+	_ = config.EnsureDataDirectory(profileInfo.DataPath)
+
+	// Create native menu
+	appMenu := createAppMenu()
 
 	// Create application with options
 	err = wails.Run(&options.App{
 		Title:             profileInfo.AppTitle,
 		Width:             1000,
 		Height:            600,
-		HideWindowOnClose: hideWindowOnClose, // Platform-specific behavior
+		HideWindowOnClose: hideWindowOnClose,
+		Menu:              appMenu,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
+			appContext = ctx
 			app.startup(ctx)
-			// Initialize Systray (platform-specific implementation)
-			// We run it in a goroutine so it doesn't block startup on platforms where it runs in-process.
 			go setupSystray(ctx, profileInfo.AppTitle)
 		},
 		Bind: []interface{}{

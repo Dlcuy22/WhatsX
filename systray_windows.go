@@ -9,16 +9,13 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// On Windows, we want to hide the window on close and use systray
 const hideWindowOnClose = true
 
-// setupSystray runs the systray on Windows. It uses iconData (embedded in main.go).
 func setupSystray(ctx context.Context, title string) {
-	// Run systray in a goroutine so it doesn't block OnStartup (ok on Windows)
 	go systray.Run(func() {
-		if len(iconData) > 0 {
-			systray.SetIcon(iconData)
-		}
+		// if len(iconData) > 0 {
+		// 	systray.SetIcon(iconData)
+		// }
 		systray.SetTitle(title)
 		systray.SetTooltip(title)
 
@@ -36,6 +33,6 @@ func setupSystray(ctx context.Context, title string) {
 			}
 		}
 	}, func() {
-		// onExit (optional)
+		// onExit
 	})
 }

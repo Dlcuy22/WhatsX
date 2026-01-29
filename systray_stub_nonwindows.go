@@ -6,7 +6,6 @@ import (
 	"context"
 )
 
-// On Linux, we don't want to hide the window on close - we want to exit
 const hideWindowOnClose = false
 
 // no-op implementation for non-windows platforms
